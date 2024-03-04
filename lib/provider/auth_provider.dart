@@ -24,8 +24,6 @@ class AuthProvider extends ChangeNotifier {
     await Future.delayed(const Duration(seconds: 3), () async {
       final token = await preferencesHelper.getToken;
       _isLogin = token.isNotEmpty;
-      debugPrint("token is not empty: $_isLogin");
-
       notifyListeners();
     });
   }
@@ -40,7 +38,6 @@ class AuthProvider extends ChangeNotifier {
       _state = ResultState(status: Status.registered);
 
       isLoadingRegister = false;
-      print("Register Succesfully bang");
       notifyListeners();
     } catch (e) {
       _state = ResultState(
@@ -65,13 +62,10 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
 
       isLoadingLogin = false;
-      print("Logeennn Succesfully bangg");
       notifyListeners();
     } catch (e) {
-      print('Error during login: $e');
       _state = ResultState(
           status: Status.error, message: 'Error --> $e', data: null);
-      print("login error bang!!!!");
       notifyListeners();
     }
   }
@@ -84,8 +78,6 @@ class AuthProvider extends ChangeNotifier {
     _isLogin = false;
 
     _state = ResultState(status: Status.initial);
-
-    print("logout succesfully bang!!!!");
     notifyListeners();
   }
 }

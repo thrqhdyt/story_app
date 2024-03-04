@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:story_app/provider/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
-  final Function() onLogin;
-  final Function() onRegister;
-
   const LoginScreen({
     super.key,
-    required this.onLogin,
-    required this.onRegister,
   });
 
   @override
@@ -110,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               await state.login(emailController.text,
                                   passwordController.text);
                               if (state.isLogin == true) {
-                                widget.onLogin();
+                                context.pushReplacement('/home');
                               } else {
                                 scaffoldMessenger.showSnackBar(
                                   const SnackBar(
@@ -128,7 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       const Text("Don't have an account?"),
                       TextButton(
-                        onPressed: () => widget.onRegister(),
+                        onPressed: () => context.push('/signup'),
                         child: const Text("Register"),
                       )
                     ],

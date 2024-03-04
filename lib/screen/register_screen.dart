@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:story_app/provider/auth_provider.dart';
 import 'package:story_app/utils/result_state.dart';
 
 class RegisterScreen extends StatefulWidget {
-  final Function() onRegister;
-  final Function() onLogin;
-
-  const RegisterScreen(
-      {super.key, required this.onRegister, required this.onLogin});
+  const RegisterScreen({super.key});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -115,7 +112,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               );
 
                               if (state.state.status == Status.registered) {
-                                widget.onLogin();
+                                context.pop();
                               }
                             }
                           },
@@ -126,7 +123,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     children: [
                       const Text("Have an account?"),
                       TextButton(
-                        onPressed: () => widget.onRegister(),
+                        onPressed: () => context.pop(),
                         child: const Text("Login"),
                       )
                     ],

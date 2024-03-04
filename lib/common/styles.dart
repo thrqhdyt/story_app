@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-const Color primaryColor = Colors.deepOrange;
-const Color secondaryColor = Colors.white;
-
 final TextTheme myTextTheme = TextTheme(
   displayLarge: GoogleFonts.openSans(
       fontSize: 96, fontWeight: FontWeight.w300, letterSpacing: -1.5),
