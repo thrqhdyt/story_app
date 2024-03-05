@@ -1,9 +1,11 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:story_app/data/model/auth_response.dart';
 import 'package:story_app/data/model/detail_story_response.dart';
 import 'package:story_app/data/model/list_story_response.dart';
+import 'package:story_app/data/model/upload_repsonse.dart';
 import 'package:story_app/preferences/preferences_helper.dart';
 
 class ApiService {
@@ -69,6 +71,50 @@ class ApiService {
       return DetailStoryResponse.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Failed to load detail story');
+    }
+  }
+
+  Future<UploadResponse> addNewStory(
+    List<int> bytes,
+    String fileName,
+    String description,
+  ) async {
+    final token = await preferencesHelper.getToken;
+    final uri = Uri.parse("$_baseUrl/stories");
+    var request = http.MultipartRequest('POST', uri);
+
+    final multiPartFile = http.MultipartFile.fromBytes(
+      "photo",
+      bytes,
+      filename: fileName,
+    );
+
+    final Map<String, String> fields = {
+      "description": description,
+    };
+
+    final Map<String, String> headers = {
+      "Content-type": "multipart/form-data",
+      'Authorization': 'Bearer $token'
+    };
+
+    request.files.add(multiPartFile);
+    request.fields.addAll(fields);
+    request.headers.addAll(headers);
+
+    final http.StreamedResponse streamedResponse = await request.send();
+    final int statusCode = streamedResponse.statusCode;
+
+    final Uint8List responseList = await streamedResponse.stream.toBytes();
+    final String responseData = String.fromCharCodes(responseList);
+
+    if (statusCode == 201) {
+      final UploadResponse uploadResponse = UploadResponse.fromJson(
+        responseData,
+      );
+      return uploadResponse;
+    } else {
+      throw Exception("Upload file error");
     }
   }
 }

@@ -6,16 +6,14 @@ import 'package:story_app/utils/result_state.dart';
 class ListStoryProvider extends ChangeNotifier {
   final ApiService apiService;
 
-  ListStoryProvider({required this.apiService}) {
-    _fetchAllStories();
-  }
+  ListStoryProvider({required this.apiService});
 
   ResultState<ListStoryResponse> _state =
       ResultState(status: Status.loading, message: null, data: null);
 
   ResultState<ListStoryResponse> get state => _state;
 
-  Future<dynamic> _fetchAllStories() async {
+  Future<dynamic> fetchAllStories() async {
     try {
       _state = ResultState(status: Status.loading, message: null, data: null);
       notifyListeners();
@@ -31,7 +29,7 @@ class ListStoryProvider extends ChangeNotifier {
         notifyListeners();
         return _state;
       }
-    } on Exception catch(e) {
+    } on Exception catch (e) {
       _state =
           ResultState(status: Status.error, message: e.toString(), data: null);
       debugPrint(e.toString());

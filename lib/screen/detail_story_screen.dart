@@ -62,7 +62,7 @@ class _DetailStoryScreenState extends State<DetailStoryScreen> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8.0),
+                            horizontal: 8.0, vertical: 8.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -94,8 +94,11 @@ class _DetailStoryScreenState extends State<DetailStoryScreen> {
                       const SizedBox(
                         height: 8.0,
                       ),
-                      Text(detailStory.description,
-                          style: Theme.of(context).textTheme.titleSmall),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(detailStory.description,
+                            style: Theme.of(context).textTheme.titleLarge),
+                      ),
                     ],
                   ),
                 ),

@@ -7,8 +7,21 @@ import 'package:story_app/provider/list_story_provider.dart';
 import 'package:story_app/utils/result_state.dart';
 import 'package:story_app/widgets/card_story.dart';
 
-class StoriesListScreen extends StatelessWidget {
+class StoriesListScreen extends StatefulWidget {
   const StoriesListScreen({super.key});
+
+  @override
+  State<StoriesListScreen> createState() => _StoriesListScreenState();
+}
+
+class _StoriesListScreenState extends State<StoriesListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(
+      () async => await context.read<ListStoryProvider>().fetchAllStories(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,8 +54,11 @@ class StoriesListScreen extends StatelessWidget {
               shrinkWrap: true,
               itemCount: result.data!.listStory.length,
               itemBuilder: (context, index) {
-                var stories = result.data!.listStory[index];
-                return CardStory(stories: stories);
+                var story = result.data!.listStory[index];
+                return CardStory(
+                  stories: story,
+                  onTap: () => context.push('/stories/detail/${story.id}'),
+                );
               },
             );
           default:

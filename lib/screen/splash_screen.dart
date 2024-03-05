@@ -17,10 +17,11 @@ class _SplashScreenState extends State<SplashScreen> {
     Future.microtask(
       () async => await Future.delayed(
         const Duration(seconds: 2),
-        () {
-          final isLogin = context.read<AuthProvider>().isLogin;
+        () async {
+          final isLogin = await context.read<AuthProvider>().checkIsLogin();
+          debugPrint(isLogin.toString());
           if (isLogin == true) {
-            context.pushReplacement('/home');
+            context.pushReplacement('/stories');
           } else if (isLogin == false) {
             context.pushReplacement('/signin');
           }

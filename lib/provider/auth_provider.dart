@@ -20,12 +20,12 @@ class AuthProvider extends ChangeNotifier {
   bool isLoadingLogin = false;
   bool isLoadingRegister = false;
 
-  void checkIsLogin() async {
-    await Future.delayed(const Duration(seconds: 3), () async {
-      final token = await preferencesHelper.getToken;
-      _isLogin = token.isNotEmpty;
-      notifyListeners();
-    });
+  Future<bool> checkIsLogin() async {
+    final token = await preferencesHelper.getToken;
+    _isLogin = token.isNotEmpty;
+    debugPrint("isNotEmpty $_isLogin");
+    notifyListeners();
+    return token.isNotEmpty;
   }
 
   Future<void> register(String name, String email, String password) async {

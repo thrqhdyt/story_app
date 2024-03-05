@@ -112,6 +112,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               );
 
                               if (state.state.status == Status.registered) {
+                                // ignore: use_build_context_synchronously
                                 context.pop();
                               }
                             }

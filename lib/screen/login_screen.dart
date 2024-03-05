@@ -106,7 +106,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               await state.login(emailController.text,
                                   passwordController.text);
                               if (state.isLogin == true) {
-                                context.pushReplacement('/home');
+                                // ignore: use_build_context_synchronously
+                                context.pushReplacement('/stories');
                               } else {
                                 scaffoldMessenger.showSnackBar(
                                   const SnackBar(
