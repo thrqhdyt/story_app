@@ -32,7 +32,6 @@ class ListStoryProvider extends ChangeNotifier {
     } on Exception catch (e) {
       _state =
           ResultState(status: Status.error, message: e.toString(), data: null);
-      debugPrint(e.toString());
       notifyListeners();
       return _state;
     }

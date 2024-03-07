@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:story_app/common.dart';
 import 'package:story_app/common/color_schemes.g.dart';
 import 'package:story_app/common/styles.dart';
 import 'package:story_app/data/api/api_service.dart';
 import 'package:story_app/preferences/preferences_helper.dart';
 import 'package:story_app/provider/auth_provider.dart';
 import 'package:story_app/provider/detail_story_provider.dart';
+import 'package:story_app/provider/localizations_provider.dart';
 import 'package:story_app/provider/new_story_provider.dart';
 import 'package:story_app/provider/list_story_provider.dart';
 import 'package:story_app/provider/upload_provider.dart';
@@ -64,63 +66,73 @@ class _MyAppState extends State<MyApp> {
         ),
         ChangeNotifierProvider<UploadProvider>(
           create: (_) => UploadProvider(apiService: apiService),
-        )
+        ),
+        ChangeNotifierProvider<LocalizationsProvider>(
+          create: (_) =>
+              LocalizationsProvider(preferencesHelper: preferencesHelper),
+        ),
       ],
-      child: MaterialApp.router(
-        debugShowCheckedModeBanner: false,
-        title: 'Story App',
-        theme: ThemeData(
-          colorScheme: lightColorScheme,
-          useMaterial3: true,
-          textTheme: myTextTheme,
-        ),
-        darkTheme: ThemeData(
-          colorScheme: darkColorScheme,
-          useMaterial3: true,
-          textTheme: myTextTheme,
-        ),
-        routerConfig: GoRouter(
-          initialLocation: '/splash',
-          routes: [
-            ShellRoute(
-                builder: (_, __, child) => AdaptiveNavigation(child: child),
-                routes: [
-                  GoRoute(
-                    path: '/stories',
-                    builder: (_, __) => const StoriesListScreen(),
-                    routes: [
-                      GoRoute(
-                        path: 'detail/:storyId',
-                        builder: (context, state) => DetailStoryScreen(
-                          storyId: state.pathParameters['storyId'] ?? '',
+      child:
+          Consumer<LocalizationsProvider>(builder: (context, provider, widget) {
+        return MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          locale: provider.locale,
+          title: 'Story App',
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          theme: ThemeData(
+            colorScheme: lightColorScheme,
+            useMaterial3: true,
+            textTheme: myTextTheme,
+          ),
+          darkTheme: ThemeData(
+            colorScheme: darkColorScheme,
+            useMaterial3: true,
+            textTheme: myTextTheme,
+          ),
+          routerConfig: GoRouter(
+            initialLocation: '/splash',
+            routes: [
+              ShellRoute(
+                  builder: (_, __, child) => AdaptiveNavigation(child: child),
+                  routes: [
+                    GoRoute(
+                      path: '/stories',
+                      builder: (_, __) => const StoriesListScreen(),
+                      routes: [
+                        GoRoute(
+                          path: 'detail/:storyId',
+                          builder: (context, state) => DetailStoryScreen(
+                            storyId: state.pathParameters['storyId'] ?? '',
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  GoRoute(
-                    path: '/add_story',
-                    builder: (_, __) => const AddStoryScreen(),
-                  ),
-                  GoRoute(
-                    path: '/setting',
-                    builder: (_, __) => const SettingScreen(),
-                  ),
-                ]),
-            GoRoute(
-              path: '/splash',
-              builder: (_, __) => const SplashScreen(),
-            ),
-            GoRoute(
-              path: '/signin',
-              builder: (_, __) => const LoginScreen(),
-            ),
-            GoRoute(
-              path: '/signup',
-              builder: (_, __) => const RegisterScreen(),
-            ),
-          ],
-        ),
-      ),
+                      ],
+                    ),
+                    GoRoute(
+                      path: '/add_story',
+                      builder: (_, __) => const AddStoryScreen(),
+                    ),
+                    GoRoute(
+                      path: '/setting',
+                      builder: (_, __) => const SettingScreen(),
+                    ),
+                  ]),
+              GoRoute(
+                path: '/splash',
+                builder: (_, __) => const SplashScreen(),
+              ),
+              GoRoute(
+                path: '/signin',
+                builder: (_, __) => const LoginScreen(),
+              ),
+              GoRoute(
+                path: '/signup',
+                builder: (_, __) => const RegisterScreen(),
+              ),
+            ],
+          ),
+        );
+      }),
     );
   }
 }

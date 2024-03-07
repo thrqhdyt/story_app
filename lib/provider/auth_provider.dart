@@ -23,7 +23,6 @@ class AuthProvider extends ChangeNotifier {
   Future<bool> checkIsLogin() async {
     final token = await preferencesHelper.getToken;
     _isLogin = token.isNotEmpty;
-    debugPrint("isNotEmpty $_isLogin");
     notifyListeners();
     return token.isNotEmpty;
   }
@@ -36,13 +35,14 @@ class AuthProvider extends ChangeNotifier {
 
       await apiService.register(name, email, password);
       _state = ResultState(status: Status.registered);
-
-      isLoadingRegister = false;
       notifyListeners();
     } catch (e) {
       _state = ResultState(
           status: Status.error, message: 'Error --> $e', data: null);
 
+      notifyListeners();
+    } finally {
+      isLoadingRegister = false;
       notifyListeners();
     }
   }
@@ -60,12 +60,12 @@ class AuthProvider extends ChangeNotifier {
 
       _isLogin = true;
       notifyListeners();
-
-      isLoadingLogin = false;
-      notifyListeners();
     } catch (e) {
       _state = ResultState(
           status: Status.error, message: 'Error --> $e', data: null);
+      notifyListeners();
+    } finally {
+      isLoadingLogin = false;
       notifyListeners();
     }
   }

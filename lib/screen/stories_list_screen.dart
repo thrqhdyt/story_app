@@ -6,6 +6,7 @@ import 'package:story_app/provider/auth_provider.dart';
 import 'package:story_app/provider/list_story_provider.dart';
 import 'package:story_app/utils/result_state.dart';
 import 'package:story_app/widgets/card_story.dart';
+import 'package:story_app/widgets/error_message.dart';
 
 class StoriesListScreen extends StatefulWidget {
   const StoriesListScreen({super.key});
@@ -63,7 +64,7 @@ class _StoriesListScreenState extends State<StoriesListScreen> {
             );
           default:
             return const Center(
-              child: Text("Error"),
+              child: ErrorMessage(),
             );
         }
       }),

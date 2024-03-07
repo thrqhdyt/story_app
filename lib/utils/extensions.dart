@@ -1,19 +1,21 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:story_app/common.dart';
 
 extension DateUtils on DateTime {
-  String get relativeTimeSpan {
+  String relativeTimeSpan(BuildContext context) {
     Duration diff = DateTime.now().difference(this);
 
     if (diff.inDays >= 1) {
-      return '${diff.inDays} days ago';
+      return '${diff.inDays} ${AppLocalizations.of(context)!.timeUploadDays}';
     } else if (diff.inHours >= 1) {
-      return '${diff.inHours} hours ago';
+      return '${diff.inHours} ${AppLocalizations.of(context)!.timeUploadHours}';
     } else if (diff.inMinutes >= 1) {
-      return '${diff.inMinutes} minutes ago';
+      return '${diff.inMinutes} ${AppLocalizations.of(context)!.timeUploadMinutes}';
     } else if (diff.inSeconds >= 1) {
-      return '${diff.inSeconds} seconds ago';
+      return '${diff.inSeconds} ${AppLocalizations.of(context)!.timeUploadSeconds}';
     } else {
-      return 'just now';
+      return AppLocalizations.of(context)!.timeUploadJustNow;
     }
   }
 }

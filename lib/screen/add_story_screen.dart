@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:story_app/common.dart';
 import 'package:story_app/provider/new_story_provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:story_app/provider/upload_provider.dart';
@@ -21,7 +22,6 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     textListener = () => context.read<UploadProvider>().isEnabled =
         textController.text.trim().isNotEmpty;
@@ -30,7 +30,6 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     textController.removeListener(textListener);
     super.dispose();
   }
@@ -40,7 +39,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "New Story",
+          AppLocalizations.of(context)!.addStoryBtnNav,
           style: Theme.of(context).textTheme.titleLarge,
         ),
       ),
@@ -70,14 +69,14 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
               children: [
                 ElevatedButton(
                   onPressed: () => _onCameraView(),
-                  child: const Text("Camera"),
+                  child: Text(AppLocalizations.of(context)!.cameraBtn),
                 ),
                 const SizedBox(
                   width: 16.0,
                 ),
                 ElevatedButton(
                   onPressed: () => _onGalleryView(),
-                  child: const Text("Gallery"),
+                  child: Text(AppLocalizations.of(context)!.galleryBtn),
                 ),
               ],
             ),
@@ -111,7 +110,7 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
               style: ElevatedButton.styleFrom(fixedSize: const Size(250, 50)),
               child: context.watch<UploadProvider>().isUploading
                   ? const CircularProgressIndicator()
-                  : const Text("Upload"),
+                  : Text(AppLocalizations.of(context)!.uploadBtn),
             ),
             const SizedBox(
               height: 16.0,

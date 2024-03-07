@@ -4,6 +4,7 @@ import 'package:story_app/data/model/detail_story_response.dart';
 import 'package:story_app/provider/detail_story_provider.dart';
 import 'package:story_app/utils/extensions.dart';
 import 'package:story_app/utils/result_state.dart';
+import 'package:story_app/widgets/error_message.dart';
 
 class DetailStoryScreen extends StatefulWidget {
   final String storyId;
@@ -82,7 +83,7 @@ class _DetailStoryScreenState extends State<DetailStoryScreen> {
                               ],
                             ),
                             Text(
-                              detailStory.createdAt.relativeTimeSpan,
+                              detailStory.createdAt.relativeTimeSpan(context),
                               style: Theme.of(context)
                                   .textTheme
                                   .labelMedium
@@ -107,7 +108,7 @@ class _DetailStoryScreenState extends State<DetailStoryScreen> {
           );
         default:
           return const Center(
-            child: Text("Error"),
+            child: ErrorMessage(),
           );
       }
     });

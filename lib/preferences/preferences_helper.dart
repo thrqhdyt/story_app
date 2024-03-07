@@ -7,6 +7,7 @@ class PreferencesHelper {
 
   static const authName = "AUTH_NAME";
   static const authToken = "AUTH_TOKEN";
+  static const languange = "LANGUANGE";
 
   Future<bool> get isLogin async {
     final prefs = await sharedPreferences;
@@ -32,5 +33,16 @@ class PreferencesHelper {
   Future<void> setToken(String value) async {
     final prefs = await sharedPreferences;
     prefs.setString(authToken, value);
+  }
+
+  Future<String> get getLanguange async {
+    final prefs = await sharedPreferences;
+    final lang = prefs.getString(languange) ?? "en";
+    return lang;
+  }
+
+  Future<void> setLanguange(String value) async {
+    final prefs = await sharedPreferences;
+    prefs.setString(languange, value);
   }
 }

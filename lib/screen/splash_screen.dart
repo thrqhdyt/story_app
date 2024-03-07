@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:story_app/provider/auth_provider.dart';
 
@@ -14,20 +15,21 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-      () async => await Future.delayed(
+    Future.microtask(() async {
+      await Future.delayed(
         const Duration(seconds: 2),
         () async {
-          final isLogin = await context.read<AuthProvider>().checkIsLogin();
-          debugPrint(isLogin.toString());
-          if (isLogin == true) {
-            context.pushReplacement('/stories');
-          } else if (isLogin == false) {
-            context.pushReplacement('/signin');
+          if (mounted) {
+            final isLogin = await context.read<AuthProvider>().checkIsLogin();
+            if (isLogin == true) {
+              context.pushReplacement('/stories');
+            } else if (isLogin == false) {
+              context.pushReplacement('/signin');
+            }
           }
         },
-      ),
-    );
+      );
+    });
   }
 
   @override
@@ -39,11 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                'Loading Splash...',
-                style: Theme.of(context).textTheme.headlineSmall,
-                textAlign: TextAlign.center,
-              ),
+              Lottie.asset('assets/splash_animation.json'),
             ],
           ),
         ),

@@ -27,9 +27,9 @@ class CardStory extends StatelessWidget {
                     children: [
                       Image.asset(
                         'assets/user.png',
-                        width: 20,
+                        width: 24,
                       ),
-                      const SizedBox(width: 6.0),
+                      const SizedBox(width: 8.0),
                       Text(stories.name,
                           style: Theme.of(context)
                               .textTheme
@@ -38,7 +38,7 @@ class CardStory extends StatelessWidget {
                     ],
                   ),
                   Text(
-                    stories.createdAt.relativeTimeSpan,
+                    stories.createdAt.relativeTimeSpan(context),
                     style: Theme.of(context)
                         .textTheme
                         .labelMedium

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:story_app/common.dart';
 import 'package:story_app/utils/extensions.dart';
 
 class AdaptiveNavigation extends StatelessWidget {
@@ -41,32 +42,34 @@ class AdaptiveNavigation extends StatelessWidget {
               selectedIndex: _getIndex(context),
               onDestinationSelected: (index) => _onNavTapped(index, context),
               destinations: List.generate(
-                  3,
-                  (index) => switch (index) {
-                        0 => const NavigationDestination(
-                            icon: Icon(Icons.home),
-                            selectedIcon: Icon(Icons.home_filled),
-                            label: "Home"),
-                        1 => Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              FloatingActionButton(
-                                onPressed: () =>
-                                    GoRouter.of(context).go('/add_story'),
-                                child: const Icon(Icons.add_outlined),
-                              ),
-                              Text(
-                                "Add Story",
-                                style: Theme.of(context).textTheme.labelMedium,
-                              )
-                            ],
-                          ),
-                        _ => const NavigationDestination(
-                            icon: Icon(Icons.settings_outlined),
-                            selectedIcon: Icon(Icons.settings),
-                            label: "Setting")
-                      }),
+                3,
+                (index) => switch (index) {
+                  0 => NavigationDestination(
+                      icon: const Icon(Icons.home),
+                      selectedIcon: const Icon(Icons.home_filled),
+                      label: AppLocalizations.of(context)!.homeBtnNav),
+                  1 => Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        FloatingActionButton(
+                          onPressed: () =>
+                              GoRouter.of(context).go('/add_story'),
+                          child: const Icon(Icons.add_outlined),
+                        ),
+                        Text(
+                          AppLocalizations.of(context)!.addStoryBtnNav,
+                          style: Theme.of(context).textTheme.labelMedium,
+                        )
+                      ],
+                    ),
+                  _ => NavigationDestination(
+                      icon: const Icon(Icons.settings_outlined),
+                      selectedIcon: const Icon(Icons.settings),
+                      label: AppLocalizations.of(context)!.settingBtnNav,
+                    )
+                },
+              ),
             ),
     );
   }
