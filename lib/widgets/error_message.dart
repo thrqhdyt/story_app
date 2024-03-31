@@ -17,7 +17,7 @@ class ErrorMessage extends StatelessWidget {
           ),
           const SizedBox(height: 16.0),
           const Text(
-            'Error loading restaurants',
+            'Error loading stories',
             style: TextStyle(color: Colors.red),
           ),
         ],

@@ -1,8 +1,10 @@
 import 'dart:io';
-
 import 'package:flutter/foundation.dart';
+import 'package:geocoding/geocoding.dart' as geo;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 import 'package:story_app/common.dart';
 import 'package:story_app/provider/new_story_provider.dart';
@@ -20,9 +22,17 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
   final textController = TextEditingController();
   late final void Function() textListener;
 
+  // ignore: avoid_init_to_null
+  LatLng? _location = null;
+  late GoogleMapController mapController;
+  late final Set<Marker> markers = {};
+
+  geo.Placemark? placemark;
+
   @override
   void initState() {
     super.initState();
+    onMyLocationButtonPress(context.read<UploadProvider>());
     textListener = () => context.read<UploadProvider>().isEnabled =
         textController.text.trim().isNotEmpty;
     textController.addListener(textListener);
@@ -99,6 +109,57 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
             const SizedBox(
               height: 24.0,
             ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: SizedBox(
+                height: 200,
+                child: Stack(
+                  children: [
+                    if (context.watch<UploadProvider>().isLocationGranted &&
+                        _location != null)
+                      GoogleMap(
+                        initialCameraPosition: CameraPosition(
+                          zoom: 15,
+                          target: _location!,
+                        ),
+                        markers: markers,
+                        mapToolbarEnabled: false,
+                        myLocationButtonEnabled: false,
+                        myLocationEnabled: true,
+                        onMapCreated: (controller) async {
+                          final info = await geo.placemarkFromCoordinates(
+                              _location!.latitude, _location!.longitude);
+                          final place = info[0];
+                          final street = place.street!;
+                          final address =
+                              '${place.subLocality}, ${place.locality}, ${place.postalCode}, ${place.country}';
+                          setState(() {
+                            placemark = place;
+                          });
+                          defineMarker(_location!, street, address);
+
+                          final marker = Marker(
+                            markerId: const MarkerId("source"),
+                            position: _location!,
+                          );
+                          setState(() {
+                            mapController = controller;
+                            markers.add(marker);
+                          });
+                        },
+                        onTap: (LatLng latLng) {
+                          context.read<UploadProvider>().curentCorrdinate =
+                              latLng;
+                          onPressGoogleMap(latLng);
+                        },
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 24.0,
+            ),
             ElevatedButton(
               onPressed: context.watch<UploadProvider>().isEnabled &&
                       context.watch<NewStoryProvider>().imagePath != null
@@ -132,9 +193,8 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
     if (imagePath == null || imageFile == null) return;
 
     final fileName = imageFile.name;
-    final bytes = await imageFile.readAsBytes();
 
-    final newBytes = await uploadProvider.compressImage(bytes);
+    final newBytes = await uploadProvider.compressImage(imageFile);
 
     await uploadProvider.upload(
       newBytes,
@@ -201,5 +261,87 @@ class _AddStoryScreenState extends State<AddStoryScreen> {
             File(imagePath.toString()),
             fit: BoxFit.contain,
           );
+  }
+
+  void onPressGoogleMap(LatLng latLng) async {
+    final info =
+        await geo.placemarkFromCoordinates(latLng.latitude, latLng.longitude);
+    final place = info[0];
+    final street = place.street!;
+    final address =
+        '${place.subLocality}, ${place.locality}, ${place.postalCode}, ${place.country}';
+    setState(() {
+      placemark = place;
+    });
+
+    defineMarker(latLng, street, address);
+
+    mapController.animateCamera(
+      CameraUpdate.newLatLng(latLng),
+    );
+  }
+
+  void onMyLocationButtonPress(UploadProvider uploadProvider) async {
+    final Location location = Location();
+    late bool serviceEnabled;
+    late PermissionStatus permissionGranted;
+    late LocationData locationData;
+
+    serviceEnabled = await location.serviceEnabled();
+    uploadProvider.isLocationGranted = serviceEnabled;
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      uploadProvider.isLocationGranted = serviceEnabled;
+      if (!serviceEnabled) {
+        return;
+      }
+    }
+
+    permissionGranted = await location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    locationData = await location.getLocation();
+    _location = LatLng(locationData.latitude!, locationData.longitude!);
+    uploadProvider.curentCorrdinate = _location;
+
+    if (_location != null) {
+      final info = await geo.placemarkFromCoordinates(
+          _location!.latitude, _location!.longitude);
+
+      final place = info[0];
+      final street = place.street;
+      final address =
+          '${place.subLocality}, ${place.locality}, ${place.postalCode}, ${place.country}';
+      setState(() {
+        placemark = place;
+      });
+
+      defineMarker(_location!, street!, address);
+
+      mapController.animateCamera(
+        CameraUpdate.newLatLng(_location!),
+      );
+    }
+  }
+
+  void defineMarker(LatLng latLng, String street, String address) {
+    final marker = Marker(
+      markerId: const MarkerId("source"),
+      position: latLng,
+      infoWindow: InfoWindow(
+        title: street,
+        snippet: address,
+      ),
+    );
+
+    setState(() {
+      markers.clear();
+      markers.add(marker);
+    });
   }
 }

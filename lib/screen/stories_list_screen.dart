@@ -16,12 +16,33 @@ class StoriesListScreen extends StatefulWidget {
 }
 
 class _StoriesListScreenState extends State<StoriesListScreen> {
+  final ScrollController scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
+    final provider = context.read<ListStoryProvider>();
+    provider.pageItems = 1;
     Future.microtask(
-      () async => await context.read<ListStoryProvider>().fetchAllStories(),
+      () async {
+        await provider.fetchAllStories();
+      },
     );
+
+    scrollController.addListener(() {
+      if (scrollController.position.pixels >=
+          scrollController.position.maxScrollExtent) {
+        if (provider.pageItems != null) {
+          provider.fetchAllStories();
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -52,9 +73,20 @@ class _StoriesListScreenState extends State<StoriesListScreen> {
             return const Center(child: CircularProgressIndicator());
           case Status.hasData:
             return ListView.builder(
+              controller: scrollController,
               shrinkWrap: true,
-              itemCount: result.data!.listStory.length,
+              itemCount: result.data!.listStory.length +
+                  (state.pageItems != null ? 1 : 0),
               itemBuilder: (context, index) {
+                if (index == result.data!.listStory.length &&
+                    state.pageItems != null) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(8),
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
                 var story = result.data!.listStory[index];
                 return CardStory(
                   stories: story,

@@ -1,3 +1,8 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'detail_story_response.g.dart';
+
+@JsonSerializable()
 class DetailStoryResponse {
   final bool error;
   final String message;
@@ -10,27 +15,20 @@ class DetailStoryResponse {
   });
 
   factory DetailStoryResponse.fromJson(Map<String, dynamic> json) =>
-      DetailStoryResponse(
-        error: json["error"],
-        message: json["message"],
-        story: Story.fromJson(json["story"]),
-      );
+      _$DetailStoryResponseFromJson(json);
 
-  Map<String, dynamic> toJson() => {
-        "error": error,
-        "message": message,
-        "story": story.toJson(),
-      };
+  Map<String, dynamic> toJson() => _$DetailStoryResponseToJson(this);
 }
 
+@JsonSerializable()
 class Story {
   final String id;
   final String name;
   final String description;
   final String photoUrl;
   final DateTime createdAt;
-  final dynamic lat;
-  final dynamic lon;
+  final double? lat;
+  final double? lon;
 
   Story({
     required this.id,
@@ -42,23 +40,7 @@ class Story {
     required this.lon,
   });
 
-  factory Story.fromJson(Map<String, dynamic> json) => Story(
-        id: json["id"],
-        name: json["name"],
-        description: json["description"],
-        photoUrl: json["photoUrl"],
-        createdAt: DateTime.parse(json["createdAt"]),
-        lat: json["lat"],
-        lon: json["lon"],
-      );
+  factory Story.fromJson(Map<String, dynamic> json) => _$StoryFromJson(json);
 
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "name": name,
-        "description": description,
-        "photoUrl": photoUrl,
-        "createdAt": createdAt.toIso8601String(),
-        "lat": lat,
-        "lon": lon,
-      };
+  Map<String, dynamic> toJson() => _$StoryToJson(this);
 }

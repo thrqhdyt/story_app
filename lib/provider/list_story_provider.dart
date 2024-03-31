@@ -13,11 +13,20 @@ class ListStoryProvider extends ChangeNotifier {
 
   ResultState<ListStoryResponse> get state => _state;
 
+  int? _pageItems = 1;
+  int sizeItems = 10;
+
+  set pageItems(int? newValue) => _pageItems = newValue;
+  // ignore: unnecessary_getters_setters
+  int? get pageItems => _pageItems;
+
   Future<dynamic> fetchAllStories() async {
     try {
-      _state = ResultState(status: Status.loading, message: null, data: null);
-      notifyListeners();
-      final stories = await apiService.listStory();
+      if (_pageItems == 1) {
+        _state = ResultState(status: Status.loading, message: null, data: null);
+        notifyListeners();
+      }
+      final stories = await apiService.listStory(_pageItems!, sizeItems);
       if (stories.listStory.isEmpty) {
         _state = ResultState(
             status: Status.noData, message: 'Empty Data', data: null);
@@ -26,6 +35,11 @@ class ListStoryProvider extends ChangeNotifier {
       } else {
         _state =
             ResultState(status: Status.hasData, message: null, data: stories);
+        if (stories.listStory.length < sizeItems) {
+          _pageItems = null;
+        } else {
+          _pageItems = _pageItems! + 1;
+        }
         notifyListeners();
         return _state;
       }

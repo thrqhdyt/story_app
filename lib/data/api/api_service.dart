@@ -42,10 +42,10 @@ class ApiService {
     }
   }
 
-  Future<ListStoryResponse> listStory() async {
+  Future<ListStoryResponse> listStory([int page = 1, int size = 10]) async {
     final token = await preferencesHelper.getToken;
     final response = await http.get(
-      Uri.parse("$_baseUrl/stories"),
+      Uri.parse("$_baseUrl/stories?page=$page&size=$size"),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $token'
@@ -75,6 +75,54 @@ class ApiService {
   }
 
   Future<UploadResponse> addNewStory(
+    List<int> bytes,
+    String fileName,
+    String description,
+    double lat,
+    double lon,
+  ) async {
+    final token = await preferencesHelper.getToken;
+    final uri = Uri.parse("$_baseUrl/stories");
+    var request = http.MultipartRequest('POST', uri);
+
+    final multiPartFile = http.MultipartFile.fromBytes(
+      "photo",
+      bytes,
+      filename: fileName,
+    );
+
+    final Map<String, String> fields = {
+      "description": description,
+      "lat": lat.toString(),
+      "lon": lon.toString(),
+    };
+
+    final Map<String, String> headers = {
+      "Content-type": "multipart/form-data",
+      'Authorization': 'Bearer $token'
+    };
+
+    request.files.add(multiPartFile);
+    request.fields.addAll(fields);
+    request.headers.addAll(headers);
+
+    final http.StreamedResponse streamedResponse = await request.send();
+    final int statusCode = streamedResponse.statusCode;
+
+    final Uint8List responseList = await streamedResponse.stream.toBytes();
+    final String responseData = String.fromCharCodes(responseList);
+
+    if (statusCode == 201) {
+      final UploadResponse uploadResponse = UploadResponse.fromJson(
+        jsonDecode(responseData) as Map<String, dynamic>,
+      );
+      return uploadResponse;
+    } else {
+      throw Exception("Upload file error");
+    }
+  }
+
+  Future<UploadResponse> addNewStoryWithoutLocation(
     List<int> bytes,
     String fileName,
     String description,
@@ -110,7 +158,7 @@ class ApiService {
 
     if (statusCode == 201) {
       final UploadResponse uploadResponse = UploadResponse.fromJson(
-        responseData,
+        jsonDecode(responseData) as Map<String, dynamic>,
       );
       return uploadResponse;
     } else {

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart' as geo;
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:story_app/data/model/detail_story_response.dart';
 import 'package:story_app/provider/detail_story_provider.dart';
@@ -16,6 +18,11 @@ class DetailStoryScreen extends StatefulWidget {
 }
 
 class _DetailStoryScreenState extends State<DetailStoryScreen> {
+  late GoogleMapController mapController;
+  late final Set<Marker> markers = {};
+
+  geo.Placemark? placemark;
+
   @override
   void initState() {
     super.initState();
@@ -28,6 +35,7 @@ class _DetailStoryScreenState extends State<DetailStoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final Set<Marker> markers = {};
     return Consumer<DetailStoryProvider>(builder: (context, state, _) {
       ResultState<DetailStoryResponse> result = state.state;
       switch (result.status) {
@@ -35,6 +43,28 @@ class _DetailStoryScreenState extends State<DetailStoryScreen> {
           return const Center(child: CircularProgressIndicator());
         case Status.hasData:
           var detailStory = result.data?.story;
+
+          var latLng = detailStory?.lat != null && detailStory?.lon != null
+              ? LatLng(detailStory!.lat!, detailStory.lon!)
+              : null;
+          if (latLng != null && markers.isEmpty) {
+            markers.add(
+              Marker(
+                  markerId: MarkerId(detailStory!.id),
+                  position: latLng,
+                  onTap: () {
+                    mapController.animateCamera(
+                      CameraUpdate.newLatLngZoom(
+                        LatLng(
+                          detailStory.lat!,
+                          detailStory.lon!,
+                        ),
+                        18,
+                      ),
+                    );
+                  }),
+            );
+          }
           return Scaffold(
             body: NestedScrollView(
               headerSliverBuilder: (context, isScrolled) {
@@ -100,6 +130,97 @@ class _DetailStoryScreenState extends State<DetailStoryScreen> {
                         child: Text(detailStory.description,
                             style: Theme.of(context).textTheme.titleLarge),
                       ),
+                      const SizedBox(
+                        height: 36.0,
+                      ),
+                      if (latLng != null)
+                        SizedBox(
+                          height: 500,
+                          child: Stack(
+                            children: [
+                              GoogleMap(
+                                markers: markers,
+                                initialCameraPosition: CameraPosition(
+                                  zoom: 18,
+                                  target: latLng,
+                                ),
+                                zoomControlsEnabled: true,
+                                onMapCreated: (controller) async {
+                                  final info =
+                                      await geo.placemarkFromCoordinates(
+                                          detailStory.lat!, detailStory.lon!);
+
+                                  final place = info[0];
+                                  final street = place.street!;
+                                  final address =
+                                      '${place.subLocality}, ${place.locality}, ${place.postalCode}, ${place.country}';
+
+                                  setState(() {
+                                    placemark = place;
+                                  });
+
+                                  final marker = Marker(
+                                    markerId: const MarkerId("source"),
+                                    position: latLng,
+                                    infoWindow: InfoWindow(
+                                      title: street,
+                                      snippet: address,
+                                    ),
+                                  );
+
+                                  setState(() {
+                                    markers.clear();
+                                    markers.add(marker);
+                                  });
+
+                                  setState(() {
+                                    mapController = controller;
+                                  });
+                                },
+                                onTap: (LatLng latLng) async {
+                                  final info =
+                                      await geo.placemarkFromCoordinates(
+                                          latLng.latitude, latLng.longitude);
+
+                                  final place = info[0];
+                                  final street = place.street!;
+                                  final address =
+                                      '${place.subLocality}, ${place.locality}, ${place.postalCode}, ${place.country}';
+
+                                  final marker = Marker(
+                                    markerId: const MarkerId("source"),
+                                    position: latLng,
+                                    infoWindow: InfoWindow(
+                                      title: street,
+                                      snippet: address,
+                                    ),
+                                  );
+
+                                  setState(() {
+                                    placemark = place;
+                                    markers.clear();
+                                    markers.add(marker);
+                                  });
+
+                                  mapController.animateCamera(
+                                    CameraUpdate.newLatLng(latLng),
+                                  );
+                                },
+                              ),
+                              if (placemark == null)
+                                const SizedBox()
+                              else
+                                Positioned(
+                                  top: 16,
+                                  right: 24,
+                                  left: 24,
+                                  child: PlacemarkWidget(
+                                    placemark: placemark!,
+                                  ),
+                                )
+                            ],
+                          ),
+                        )
                     ],
                   ),
                 ),
@@ -112,5 +233,58 @@ class _DetailStoryScreenState extends State<DetailStoryScreen> {
           );
       }
     });
+  }
+}
+
+class PlacemarkWidget extends StatelessWidget {
+  const PlacemarkWidget({
+    super.key,
+    required this.placemark,
+  });
+
+  final geo.Placemark placemark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      constraints: const BoxConstraints(maxWidth: 700),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.all(Radius.circular(20)),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            blurRadius: 20,
+            offset: Offset.zero,
+            color: Colors.grey.withOpacity(0.5),
+          )
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  placemark.street!,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium!
+                      .copyWith(color: Theme.of(context).primaryColor),
+                ),
+                Text(
+                  '${placemark.subLocality}, ${placemark.locality}, ${placemark.postalCode}, ${placemark.country}',
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelMedium!
+                      .copyWith(color: Theme.of(context).primaryColor),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
